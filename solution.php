@@ -11,33 +11,33 @@ class ConfigPreprocessor
 		
 
 		$this->setUpTasks($config);
-		echo "this is the list of all tasks\n";
-		var_dump($this->$tasks);
-		echo "the tasks are above";
+	//	echo "this is the list of all tasks\n";
+	//	var_dump($this->$tasks);
+	//	echo "the tasks are above";
 	}
 
-	private function does_it_depend_on($a, $b) {
-		echo "this is A\r\n";
-		var_dump($a);
-		if (in_array($b['id'], $a['dependencies'])) {
-			return true; 
-		} 
-		$is_a_dependencies = false; 
-		if (is_array($a["dependencies"]) && count($a["dependencies"]) > 0){
-			foreach ($a["dependencies"] as $dep) {
-				//get the data for it and call the method to see if we return true 
-				$item = null;
-				foreach($this->$tasks as $task) {
-					if ($dep == $task->id) {
-						$this->$tasks  =  $task;
-						break;
-					}
-				}
-				$is_a_dependencies = $this->does_it_depend_on($dep, $b) || $is_a_dependencies ;
-			}
-		}
-		return $is_a_dependencies; 
-	}
+//	private function does_it_depend_on($a, $b) {
+//		echo "this is A\r\n";
+//		var_dump($a);
+//		if (in_array($b['id'], $a['dependencies'])) {
+//			return true; 
+//		} 
+//		$is_a_dependencies = false; 
+//		if (is_array($a["dependencies"]) && count($a["dependencies"]) > 0){
+//			foreach ($a["dependencies"] as $dep) {
+//				//get the data for it and call the method to see if we return true 
+//				$item = null;
+//				foreach($this->$tasks as $task) {
+//					if ($dep == $task->id) {
+////						$this->$tasks  =  $task;
+	//					break;
+//					}
+//				}
+//				$is_a_dependencies = $this->does_it_depend_on($dep, $b) || $is_a_dependencies ;
+//			}
+//		}
+//		return $is_a_dependencies; 
+//	}
 	private function compareTasks($a, $b)
 	{
 		$temp_a = array();
@@ -73,25 +73,26 @@ class ConfigPreprocessor
 			//check if A before B violates rule 1
 			// A has higher priority than B, A doesn't go before B because A has the dependencies that B goes in front of if A has a dependencies of C 
 			// if C is a depencies of A and B is a dependencies of C then A has to go after C
-			if (count($temp_a["dependencies"]) > 0) {
-				if ($this->does_it_depend_on($temp_a, $temp_b) ) {
-					return 1;
-				} else {
-					return -1; 
-				}
-			} else {
+		
+		//	if (count($temp_a["dependencies"]) > 0) {
+		//		if ($this->does_it_depend_on($temp_a, $temp_b) ) {
+		//			return 1;
+		//		} else {
+		//			return -1; 
+		//		}
+		//	} else {
 				return -1; 
-			}
+		//	}
 			//if doesn't, return -1
 		} 
 	 
-		if ($temp_a["id"] < $temp_b["id"]) {
-			if (!$this->does_it_depend_on($temp_a, $temp_b) && !($temp_b["priority"] > $temp_a["priority"])) {
-				return -1; 
-			} else {
-				return 1; 
-			}
-		} 
+//		if ($temp_a["id"] < $temp_b["id"]) {
+//			if (!$this->does_it_depend_on($temp_a, $temp_b) && !($temp_b["priority"] > $temp_a["priority"])) {
+//				return -1; 
+//			} else {
+//				return 1; 
+//			}
+//		}
 		
 	//	if ($temp_a['id'] < $temp_b['id']) {
 	//		return -1; 

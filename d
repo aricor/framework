@@ -5,7 +5,7 @@
 {"id":"5c0d867bc1a11-5","command":"nCGwgG","priority":2,"dependencies":["5c0d867bc19b1-3"]},
 {"id":"5c0d867bc19e1-4","command":"pNqjRWvHZzG7Z7","priority":1,"dependencies":["5c0d867bc1a70-7"]},
 {"id":"5c0d867bc1a41-6","command":"cJaxkTaRpqWuWm6","priority":0,"dependencies":[]},
-{"id":"5c0d867bc1980-2","command":"aIjQuQ4","priority":1,"dependencies":["5c0d867bc1a41-6"]}]Macs-MacBook-Pro:framework mac$ 
+{"id":"5c0d867bc1980-2","command":"aIjQuQ4","priority":1,"dependencies":["5c0d867bc1a41-6"]}]
 
 3 
 7 
