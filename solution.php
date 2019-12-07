@@ -19,43 +19,21 @@ class ConfigPreprocessor
 	private function does_it_depend_on($a, $b) {
 		echo "this is A\r\n";
 		var_dump($a);
-		$temp_a = array();
-		$temp_b = array();
-
-		if (is_object($a)) {
-			$temp_a['id'] = $a->id;  
-			$temp_a['command'] = $a->command;  
-			$temp_a['priority'] = $a->priority;  
-			$temp_a['dependencies'] = $a->dependencies;  
-
-		} else {
-			$temp_a = $a; 
-		}
-		if (is_object($b)) {
-			$temp_b['id'] = $b->id;  
-			$temp_b['command'] = $b->command;  
-			$temp_b['priority'] = $b->priority;  
-			$temp_b['dependencies'] = $b->dependencies;  
-
-		} else {
-			$temp_b = $b; 
-		}
-		if (in_array($temp_b['id'], $temp_a['dependencies'])) {
+		if (in_array($b['id'], $a['dependencies'])) {
 			return true; 
 		} 
 		$is_a_dependencies = false; 
-		if (is_array($temp_a["dependencies"]) && count($temp_a["dependencies"]) > 0){
-			foreach ($temp_a["dependencies"] as $dep) {
+		if (is_array($a["dependencies"]) && count($a["dependencies"]) > 0){
+			foreach ($a["dependencies"] as $dep) {
 				//get the data for it and call the method to see if we return true 
-				$item = null; 
+				$item = null;
 				foreach($this->$tasks as $task) {
-					if ($dep == $task['id']) {
-						$item  =  $task;
+					if ($dep == $task->id) {
+						$this->$tasks  =  $task;
 						break;
 					}
 				}
-
-				$is_a_dependencies = $this->does_it_depend_on($dep, $temp_b) || $is_a_dependencies ;
+				$is_a_dependencies = $this->does_it_depend_on($dep, $b) || $is_a_dependencies ;
 			}
 		}
 		return $is_a_dependencies; 
