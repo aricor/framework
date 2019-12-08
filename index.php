@@ -13,21 +13,17 @@ function recodex_prepare_data(&$input)
 	}
 
 	if (is_object($input) && $counter % 2 == 0) {
-		$input = (array)$input;	// flip every other object to associative array 
-		//$input['value'] //accesss array 
-		//$input->value  // access object
+		$input = (array)$input;	
 	}
 }
 
 function recodex_run(&$argv) { 
-	//['index.php', 'filename.io'] 
-	array_shift($argv);	// skip script name ['filename.io']
-	$fileName = array_shift($argv); // $filename == filename.io -> [] $empty
+	array_shift($argv);	
+	$fileName = array_shift($argv); 
 	if (!$fileName)
 		throw new Exception("No input file given.");
 
-	$input = json_decode( file_get_contents($fileName) ); //so basically $input = the contents 
-	//var_dump( $input); 
+	$input = json_decode( file_get_contents($fileName) ); //
 	if (!$input)
 		throw new Exception("Given file '$fileName' does not hold a valid input.");
 
@@ -38,7 +34,7 @@ function recodex_run(&$argv) {
 		$result = $proc->getAllTasks();
 	}
 	catch (Exception $e) {
-		echo "Exception\n";	// some expections may be expected
+		echo "Exception\n";	
 		exit(0);
 	}
 

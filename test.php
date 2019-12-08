@@ -18,72 +18,25 @@ class ConfigPreprocessor
 	private function has_higher_priority($a,$b) {
 		return $a["priority"] >= $b["priority"] ;
 	}
-	/**
-	 * given a task, retrieve all the dependencies
-	 * @param array $tofind the task that we need to get dependencies for 
-	 * @param array $dependencies the accumulator 
-	 */
-	
-	private function get_dependencies($tofind,$dependencies) {
-		//echo "* get_dependencies *";
-		foreach ($tofind["dependencies"] as $dep) {
-			//get the data for it and call the method to see if we return true 
-			$item = null;
-			foreach($this->$tasks as $task) {
-				if ($dep == $task["id"]) {
-					$item = $task; 
-					//echo " \r\n get_dependencies ABOUT TO BREAK \r\n"; 
-					// check for circular dependencies 
-					foreach ($dependencies as $already_found) {
-						if ($tasks["id"] == $already_found["id"]) {
-							// circular dependencies 
-							throw new Exception("circular dependencies found"); 
-						}
-					}
-					
-					array_push($dependencies, $item);
-					//var_dump($dependencies); 
-					if (count($item["dependencies"]) > 0) {
-						//echo "item has more dependencies"; 
-						return $this->get_dependencies($item, $dependencies); 
-					}
-				}
-			}
-			
-		}
-		return $dependencies; 
-	}
-	private function has_same_dependencies($a, $b) {
-		//echo "\r\n *Z* dependencies_of_a *Z*\r\n";
+	private function does_it_depend_on($a, $b, $has_switched = false) {
+		echo "** does_it_depend_on ** \r\n";
+		echo "\r\n ** A ** \r\n";
+		echo $a["id"];
+		echo "\r\n ** B ** \r\n";
+		echo $b["id"];
 
-		$dependencies_of_a= $this->get_dependencies($a,[]);
-		//var_dump($dependencies_of_a); 
-		//echo "\r\n *Z* dependencies_of_b *Z*\r\n";
-
-		$dependencies_of_b= $this->get_dependencies($b,[]);
-		//var_dump($dependencies_of_b); 
-		foreach ($dependencies_of_a as $dep_a) {
-			foreach ($dependencies_of_b as $dep_b) {
-				if ($dep_a["id"] == $dep_b["id"]) {
-					return true; 
-				} 
-			}
-		}
-		return false; 
-	}
-	private function does_it_depend_on($a, $b) {
-		//echo "** does_it_depend_on ** \r\n";
-		//echo "\r\n ** A ** \r\n";
-		//echo $a["id"];
-		//echo "\r\n ** B ** \r\n";
-		//echo $b["id"];
-
-		//echo "\r\n ** compareTasks ** \r\n";
+		echo "\r\n ** compareTasks ** \r\n";
 		//echo $this->compareTasks($a,$b);
 
-		if (($this->directly_depends_on($a,$b) || $this->has_strictly_higher_priority($b,$a)) && !$this->directly_depends_on($b,$a)) {
-			//echo "\r\n *Y* A is on dependencies list of B *Y*\r\n";
-			return true; 
+		if (($this->directly_depends_on($a,$b) || $this->has_strictly_higher_priority($b,$a))) {
+			echo "\r\n *Y* A is on dependencies list of B *Y*\r\n";
+			if ($has_switched) {
+				return true; 
+			} else {
+				return !$this->does_it_depend_on($b,$a, true);
+			}
+
+
 		} 
 		$is_a_dependencies = false; 
 		if (is_array($a["dependencies"]) && count($a["dependencies"]) > 0){
@@ -93,20 +46,20 @@ class ConfigPreprocessor
 				foreach($this->$tasks as $task) {
 					if ($dep == $task["id"]) {
 						$item = $task; 
-					//	echo " \r\n ABOUT TO BREAK \r\n";
+						echo " \r\n ABOUT TO BREAK \r\n";
 						break;
 					}
 				}
 				$is_a_dependencies = $this->does_it_depend_on($item, $b) || $is_a_dependencies ;
 			}
 		}
-		//echo "\r\n *X* does_it_depend_on return *X* \r\n";
-		//echo $is_a_dependencies;
+		echo "\r\n *X* does_it_depend_on return *X* \r\n";
+		echo $is_a_dependencies;
 		return $is_a_dependencies; 
 	}
 	private function directly_depends_on($a,$b) {
 		if (in_array($b['id'], $a['dependencies'])) {
-			//echo "\r\n *Y* A has dependencies list of B *Y*\r\n";
+			echo "\r\n *Y* A has dependencies list of B *Y*\r\n";
 			return true; 
 		} 
 	}
@@ -146,30 +99,30 @@ class ConfigPreprocessor
 		} else {
 			$temp_b = $b; 
 		}
-		//echo "\r\n compareTasks \r\n";
-		//echo "\r\n A \r\n";
-		//echo $temp_a["id"];
-		//echo "\r\n B \r\n";
-		//echo $temp_b["id"];
+		echo "\r\n compareTasks \r\n";
+		echo "\r\n A \r\n";
+		echo $temp_a["id"];
+		echo "\r\n B \r\n";
+		echo $temp_b["id"];
 		//If a task A is on the dependencies list of a task B (i.e., B depends on A), then A must be in the result before B.
 		if ($this->directly_depends_on($temp_b,$temp_a)) {
-			//echo "\r\n a is a DIRECT dependency of b \r\n"; 
+			echo "\r\n a is a DIRECT dependency of b \r\n"; 
 			return -1; 
 		} 
 		if ($this->directly_depends_on($temp_a,$temp_b)) {
-			//echo "\r\n B is a DIRECT dependency of A \r\n"; 
+			echo "\r\n B is a DIRECT dependency of A \r\n"; 
 			return 1; 
 		} 
 		//A task with a higher priority must appear in the result before a task with lower priority, unless it will violate the previous rule.
 		if ($this->has_strictly_higher_priority($temp_a,$temp_b)) {
-			//echo "\r\na is higher priority than b \r\n"; 
+			echo "\r\na is higher priority than b \r\n"; 
 			//check if A before B violates rule 1
 			// A has higher priority than B, A doesn't go before B because A has the dependencies that B goes in front of if A has a dependencies of C 
 			// if C is a depencies of A and B is a dependencies of C then A has to go after C
 		
 			if (count($temp_a["dependencies"]) > 0) {
 				if ($this->does_it_depend_on($temp_a, $temp_b) ) {
-					//echo "\r\nBUT it depends on B\r\n";
+					echo "\r\nBUT it depends on B\r\n";
 					return 1;
 				} else {
 					return -1; 
@@ -181,14 +134,14 @@ class ConfigPreprocessor
 		} 
 	 
 		if ($this->has_strictly_higher_priority($temp_b,$temp_a)) {
-			//echo "\r\nB is stricly higher priority than A \r\n"; 
+			echo "\r\nB is stricly higher priority than A \r\n"; 
 			//check if A before B violates rule 1
 			// A has higher priority than B, A doesn't go before B because A has the dependencies that B goes in front of if A has a dependencies of C 
 			// if C is a depencies of A and B is a dependencies of C then A has to go after C
 		
 			if (count($temp_b["dependencies"]) > 0) {
 				if ($this->does_it_depend_on($temp_b, $temp_a) ) {
-				//	echo "\r\nBUT it depends on A\r\n";
+					echo "\r\nBUT it depends on A\r\n";
 					return -1;
 				} else {
 					return 1; 
@@ -199,31 +152,28 @@ class ConfigPreprocessor
 			//if doesn't, return -1
 		} 
 		//find index of temp_a
-		//echo " \r\n index of A \r\n";
+		echo " \r\n index of A \r\n";
 		$index_of_a = $this->indexOf($temp_a);
-		//echo $index_of_a; 
+		echo $index_of_a; 
 		// find index of temp_b
-		//echo " \r\n index of B \r\n";
+		echo " \r\n index of B \r\n";
 		$index_of_b = $this->indexOf($temp_b);
-		//echo $index_of_b; 
+		echo $index_of_b; 
 
 		if ($index_of_a < $index_of_b) {
-		//	echo " \r\n A has smaller index than B \r\n";
-			if ($this->has_same_dependencies($temp_a,$temp_b)) {
-				return -1; 
-			}
+			echo " \r\n A has smaller index than B \r\n";
 			if (!$this->does_it_depend_on($temp_a, $temp_b) && 	$this->has_higher_priority($temp_a,$temp_b)) {
-		//	echo " \r\n ALSO  A doesn't depend on B and A doesn't have strictly lower priority than B \r\n";
+			echo " \r\n ALSO  A doesn't depend on B and A doesn't have strictly lower priority than B \r\n";
 
 				return -1; 
 			} else {
-			//	echo '\r\n $this->does_it_depend_on($temp_a, $temp_b) \r\n' ; 
-			//	echo $this->does_it_depend_on($temp_a, $temp_b); 
-			//	echo " \r\n BUT A depends on B or has lower priority \r\n";
+				echo '\r\n $this->does_it_depend_on($temp_a, $temp_b) \r\n' ; 
+				echo $this->does_it_depend_on($temp_a, $temp_b); 
+				echo " \r\n BUT A depends on B or has lower priority \r\n";
 				return 1; 
 			}
 		} else {
-		//	echo " \r\n B has lower index than A \r\n";
+			echo " \r\n B has lower index than A \r\n";
 			return 1; 
 		}
 		
@@ -276,6 +226,7 @@ class ConfigPreprocessor
 		//		echo "key exists"; 
 			}
 			
+
 		}
 	
 		if (is_object($element)) {
